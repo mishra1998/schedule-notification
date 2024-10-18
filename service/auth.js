@@ -250,20 +250,22 @@ const login = async (payload) => {
 
   try {
     const response = await UserModel.findOne({
-      where:
-          {
-            email, user_type: USER_TYPE.CUSTOMER, is_email_verified: true,
-          },
+      where: {
+        email,
+        user_type: USER_TYPE.CUSTOMER,
+        is_email_verified: true,
+      },
       transaction,
       lock: transaction.LOCK.UPDATE,
-      attributes: [ 'hashed_password', 'salt', 'email', [ 'public_id', 'user_id' ], 'user_type',
+      attributes: [
+        'hashed_password', 'salt', 'email', [ 'public_id', 'user_id' ], 'user_type',
         'is_email_verified', 'is_mobile_verified', 'mobile_number', 'system_generated_password',
-        'status', 'is_mfa_enabled', 'mfa_secret' ],
+        'status', 'is_mfa_enabled', 'mfa_secret',
+      ],
     });
 
     if (response) {
       const doc = Helper.convertSnakeToCamel(response.dataValues);
-
       const {
         userId, status, hashedPassword, salt, systemGeneratedPassword, isMfaEnabled, mfaSecret, ...newDoc
       } = doc;
@@ -278,7 +280,7 @@ const login = async (payload) => {
             return {
               errors: {
                 errorCode: ErrorCode['100'],
-                details: [ { name: 'isSystemGeneratedPassword', message: 'Invalid password! this password is system generated password' } ],
+                details: [ { name: 'isSystemGeneratedPassword', message: 'Invalid password! This password is system-generated.' } ],
               },
             };
           }
@@ -289,7 +291,7 @@ const login = async (payload) => {
             return {
               errors: {
                 errorCode: ErrorCode['101'],
-                details: [ { name: 'isMfaEnabled', message: 'Mfa not enabled!' } ],
+                details: [ { name: 'isMfaEnabled', message: 'MFA not enabled!' } ],
               },
             };
           }
@@ -301,12 +303,13 @@ const login = async (payload) => {
               return {
                 errors: {
                   errorCode: ErrorCode['101'],
-                  details: [ { name: 'isMfaEnabled', message: 'Missing totp parameter!' } ],
+                  details: [ { name: 'isMfaEnabled', message: 'Missing TOTP parameter!' } ],
                 },
               };
             }
 
-            const { delta } = twoFactor.verifyToken(mfaSecret, totp) || { delta: -2 };
+            const verified = twoFactor.verifyToken(mfaSecret, totp);
+            const { delta } = verified || { delta: -2 };
 
             if (delta === -2) {
               await transaction.rollback();
@@ -314,29 +317,29 @@ const login = async (payload) => {
               return {
                 errors: {
                   errorCode: ErrorCode['400'],
-                  details: [ { name: 'isMfaEnabled', message: 'invalid MFA code' } ],
+                  details: [ { name: 'isMfaEnabled', message: 'Invalid MFA code.' } ],
                 },
               };
             }
 
-            if (delta === -1) {
+            if (delta < 0) {
               await transaction.rollback();
 
               return {
                 errors: {
                   errorCode: ErrorCode['400'],
-                  details: [ { name: 'isMfaEnabled', message: 'invalid MFA code,too late' } ],
+                  details: [ { name: 'isMfaEnabled', message: 'MFA code is too late.' } ],
                 },
               };
             }
 
-            if (delta === 1) {
+            if (delta > 0) {
               await transaction.rollback();
 
               return {
                 errors: {
                   errorCode: ErrorCode['400'],
-                  details: [ { name: 'isMfaEnabled', message: 'invalid MFA code,too early' } ],
+                  details: [ { name: 'isMfaEnabled', message: 'MFA code is too early.' } ],
                 },
               };
             }
@@ -345,21 +348,18 @@ const login = async (payload) => {
           await UserModel.update({ last_login_at: new Date() }, { where: { public_id: userId }, transaction });
 
           const signedPayload = { ...newDoc, loginType: LOGIN_TYPE.USER_NAME_PASSWORD };
-
           const { token, refreshToken, expiresIn } = await authentication.signToken(signedPayload);
 
           await transaction.commit();
 
-          return {
-            doc: { token, expiresIn, refreshToken },
-          };
+          return { doc: { token, expiresIn, refreshToken } };
         }
 
         await transaction.rollback();
 
         return {
           errors: {
-            details: [ { name: 'password', message: 'invalid password.' } ],
+            details: [ { name: 'password', message: 'Invalid password.' } ],
           },
         };
       }
@@ -369,7 +369,7 @@ const login = async (payload) => {
       return {
         errors: {
           errorCode: ErrorCode['400'],
-          details: [ { name: 'userName', message: 'user is not active' } ],
+          details: [ { name: 'userName', message: 'User is not active.' } ],
         },
       };
     }
@@ -379,12 +379,11 @@ const login = async (payload) => {
     return {
       errors: {
         errorCode: ErrorCode['400'],
-        details: [ { name: 'userName', message: 'user is not registered' } ],
+        details: [ { name: 'userName', message: 'User is not registered.' } ],
       },
     };
   } catch (error) {
     await transaction.rollback();
-
     throw error;
   }
 };
@@ -430,7 +429,7 @@ const verifyMFA = async (payload) => {
       if (verified) {
         const { delta } = verified;
 
-        if (!delta) {
+        if (delta === 0) {
           await UserModel.update(
             {
               is_mfa_enabled: true,
@@ -448,8 +447,15 @@ const verifyMFA = async (payload) => {
         }
 
         await transaction.rollback();
-
-        return { doc: { isVerified: false } };
+        if (delta < 0) {
+          return {
+            errors: [ { name: 'Otp', message: 'MFA code is too old.' } ],
+          };
+        } if (delta > 0) {
+          return {
+            errors: [ { name: 'Otp', message: 'MFA code is too early.' } ],
+          };
+        }
       }
 
       await transaction.rollback();
@@ -462,7 +468,6 @@ const verifyMFA = async (payload) => {
     return { errors: [ { name: 'User', message: 'User does not exist!' } ] };
   } catch (error) {
     await transaction.rollback();
-
     throw error;
   }
 };
