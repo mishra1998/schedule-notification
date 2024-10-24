@@ -76,9 +76,23 @@ const submitReceipt = async (receiptNumber, registrationToken) => {
     if (currentCaseStatusTextEn) {
       const notificationData = { title: 'Case Status Update', caseStatus: currentCaseStatusTextEn };
 
-      await sendNotification(registrationToken, notificationData);
+      const notificationResult = await sendNotification(registrationToken, notificationData);
 
-      await UserDeviceModel.update({ status: currentCaseStatusTextEn }, { where: { registration_token: registrationToken } });
+      if (notificationResult.err) {
+        return { err: notificationResult.err };
+      }
+
+      const updatedStatusHistory = userDevice.status_history || [];
+
+      updatedStatusHistory.push({
+        status: currentCaseStatusTextEn,
+        timestamp: new Date().toISOString(),
+      });
+
+      await UserDeviceModel.update(
+        { status: currentCaseStatusTextEn, status_history: updatedStatusHistory },
+        { where: { registration_token: registrationToken } },
+      );
 
       return { currentCaseStatusTextEn, message: 'Notification successfully sent.' };
     }
@@ -92,7 +106,9 @@ const submitReceipt = async (receiptNumber, registrationToken) => {
 // Cron job to run every hour
 cron.schedule('0 * * * *', async () => {
   try {
-    const users = await UserDeviceModel.findAll({ where: { status: { [Op.ne]: 'approved' } } });
+    const users = await UserDeviceModel.findAll({
+      where: { status: { [Op.ne]: 'Case Approval Was Affirmed' } },
+    });
 
     if (!users.length) {
       console.log('No users with pending case status.');
@@ -123,7 +139,15 @@ cron.schedule('0 * * * *', async () => {
           caseStatus: currentCaseStatusTextEn,
         });
 
-        await UserDeviceModel.update({ status: currentCaseStatusTextEn }, { where: { registration_token: registrationToken } });
+        const updatedStatusHistory = [
+          ...user.status_history,
+          { status: currentCaseStatusTextEn, timestamp: new Date().toISOString() },
+        ];
+
+        await UserDeviceModel.update(
+          { status: currentCaseStatusTextEn, status_history: updatedStatusHistory },
+          { where: { registration_token: registrationToken } },
+        );
       }
     });
 
@@ -131,7 +155,10 @@ cron.schedule('0 * * * *', async () => {
 
     if (messages.length > 0) {
       await Promise.all(messages.map(async (message) => {
-        await sendNotification(message.token, { title: message.title, caseStatus: message.caseStatus });
+        await sendNotification(message.token, {
+          title: message.title,
+          caseStatus: message.caseStatus,
+        });
       }));
       console.log('Notifications sent for case status updates.');
 

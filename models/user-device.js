@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       type: DataTypes.STRING,
     },
+    status_history: {
+      type: DataTypes.JSONB,
+      defaultValue: [],
+    },
   }, {
     freezeTableName: true,
     underscored: true,

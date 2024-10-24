@@ -25,7 +25,7 @@ module.exports = {
     CUSTOMER: 'CUSTOMER',
   },
 
-  CUSTOMER_IGNORE_PATH: [ '/api/register', '/api/verification', '/api/set-password', '/api/login', '/api/register-token', '/api/submit-receipt' ],
+  CUSTOMER_IGNORE_PATH: [ '/api/submit-receipt' ],
 
   AUDIENCE_TYPE: {
     PLATFORM: 'PLATFORM',

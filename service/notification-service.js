@@ -1,6 +1,5 @@
 const firebaseApp = require('./firebase');
 
-// Function to send a notification
 const sendNotification = async (token, data) => {
   try {
     await firebaseApp.messaging().send({
@@ -18,14 +17,16 @@ const sendNotification = async (token, data) => {
     });
 
     console.log(`Notification sent to token: ${token}`);
+
+    return { message: 'Notification sent.' };
   } catch (error) {
     console.error(`Error sending notification to ${token}:`, error.message);
 
-    // Handle specific error cases
     if (error.code === 'messaging/invalid-argument' || error.code === 'messaging/registration-token-not-registered') {
       console.warn(`Device token ${token} is not registered. Skipping notification.`);
-      // Optionally, you may want to remove the token from your database here
     }
+
+    return { err: error.message };
   }
 };
 

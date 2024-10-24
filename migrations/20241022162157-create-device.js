@@ -23,6 +23,10 @@ module.exports = {
     status: {
       type: DataTypes.STRING,
     },
+    status_history: {
+      type: DataTypes.JSONB,
+      defaultValue: [],
+    },
     created_at: {
       allowNull: false,
       type: DataTypes.DATE,

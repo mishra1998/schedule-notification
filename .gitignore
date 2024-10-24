@@ -61,3 +61,4 @@ coverage
 *.tfstate*
 
 pnpm-lock.yaml
+.vscode
