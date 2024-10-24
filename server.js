@@ -1,17 +1,21 @@
 const express = require('express');
 const { Sequelize } = require('sequelize');
+// const cron = require('node-cron');
 const config = require('./config');
 const defaultRoutes = require('./routes/index');
 const { CUSTOMER_IGNORE_PATH, AUDIENCE_TYPE, ISSUER } = require('./utils/constant');
 const Authentication = require('./utils/middlewares/auth');
 
+require('./service/case-status');
+
 const app = express();
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || 3004;
 
 app.use(express.json());
 
 const environment = process.env.NODE_ENV || 'test';
 const dbConfig = config.DATABASE[environment];
+
 const sequelize = new Sequelize(dbConfig.name, dbConfig.username, dbConfig.password, {
   host: dbConfig.options.host,
   dialect: dbConfig.options.dialect,

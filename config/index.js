@@ -8,12 +8,12 @@ module.exports = {
   PORT: process.env.PORT || 3000,
   DATABASE: {
     development: {
-      name: process.env.DB_NAME_DEV || 'test',
+      name: process.env.DB_NAME_DEV || 'mysql',
       username: process.env.DB_USER_NAME_DEV || 'root',
       password: process.env.DB_PASSWORD_DEV || '',
       options: {
         host: process.env.DB_HOST_DEV || '127.0.0.1',
-        port: process.env.DB_PORT_DEV || 3307,
+        port: process.env.DB_PORT_DEV || 3306,
         dialect: 'mysql',
         freezeTableName: true,
         define: {
@@ -41,7 +41,7 @@ module.exports = {
       password: process.env.DB_PASSWORD_TEST || '',
       options: {
         host: process.env.DB_HOST_TEST || '127.0.0.1',
-        port: process.env.DB_PORT_TEST || 3307,
+        port: process.env.DB_PORT_TEST || 3306,
         dialect: 'mysql',
         freezeTableName: true,
         define: {
@@ -64,12 +64,12 @@ module.exports = {
       },
     },
     production: {
-      name: process.env.DB_NAME_PROD || 'test',
+      name: process.env.DB_NAME_PROD || 'mysql',
       username: process.env.DB_USER_NAME_PROD || 'root',
       password: process.env.DB_PASSWORD_PROD || '',
       options: {
         host: process.env.DB_HOST_PROD || '127.0.0.1',
-        port: process.env.DB_PORT_PROD || 3307,
+        port: process.env.DB_PORT_PROD || 3306,
         dialect: 'mysql',
         freezeTableName: true,
         define: {

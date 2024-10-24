@@ -22,7 +22,6 @@ const middleware = (config) => (req, res, next) => {
   const token = authorization.split(' ')[1];
 
   try {
-    // Verify the token using HS256 and the same secret key
     const decodedToken = jwt.verify(token, config.JWT_SECRET || 'agileSecretKey', {
       audience: config.AUDIENCE || 'CUSTOMER',
       issuer: config.ISSUER || 'AGILE WORLD TECHNOLOGIES',
