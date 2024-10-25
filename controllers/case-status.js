@@ -46,4 +46,26 @@ const submitReceipt = async (req, res) => {
   }
 };
 
-module.exports = { registerToken, submitReceipt };
+const getDetailByRegistrationToken = async (req, res) => {
+  try {
+    const { params: { registrationToken } } = req;
+
+    if (!registrationToken) {
+      return res.status(400).json({ status: 'error', message: 'Registration token is required' });
+    }
+
+    const data = { registrationToken };
+
+    const { doc } = await CaseStatusService.getDetailByRegistrationToken(data);
+
+    if (doc) {
+      return res.status(200).json(doc);
+    }
+
+    return res.status(400).json({ status: 'error', message: 'Field validation failed' });
+  } catch (error) {
+    return res.status(500).json({ status: 'error', message: 'Internal server error' });
+  }
+};
+
+module.exports = { registerToken, submitReceipt, getDetailByRegistrationToken };

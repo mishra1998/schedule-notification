@@ -103,7 +103,25 @@ const submitReceipt = async (receiptNumber, registrationToken) => {
   }
 };
 
-// Cron job to run every hour
+const getDetailByRegistrationToken = async (data) => {
+  try {
+    const { registrationToken } = data;
+
+    const userDevice = await UserDeviceModel.findOne({
+      where: { registration_token: registrationToken },
+      attributes: [ 'status', 'status_history' ],
+    });
+
+    if (!userDevice) {
+      return { message: 'User not found.' };
+    }
+
+    return { doc: { status: userDevice.status, statusHistory: userDevice.status_history } };
+  } catch (error) {
+    return { err: error.message };
+  }
+};
+
 cron.schedule('0 * * * *', async () => {
   try {
     const users = await UserDeviceModel.findAll({
@@ -175,4 +193,4 @@ cron.schedule('0 * * * *', async () => {
   }
 });
 
-module.exports = { registerToken, submitReceipt };
+module.exports = { registerToken, submitReceipt, getDetailByRegistrationToken };

@@ -7,7 +7,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     receipt_number: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     registration_token: {
       type: DataTypes.STRING,

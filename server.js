@@ -1,28 +1,18 @@
 const express = require('express');
 const { Sequelize } = require('sequelize');
-// const cron = require('node-cron');
-const config = require('./config');
+const config = require('./config/config.json');
 const defaultRoutes = require('./routes/index');
-const { CUSTOMER_IGNORE_PATH, AUDIENCE_TYPE, ISSUER } = require('./utils/constant');
-const Authentication = require('./utils/middlewares/auth');
-
-require('./service/case-status');
 
 const app = express();
-const port = process.env.PORT || 3004;
+const port = 3000;
 
 app.use(express.json());
 
-const environment = process.env.NODE_ENV || 'test';
-const dbConfig = config.DATABASE[environment];
-
-const sequelize = new Sequelize(dbConfig.name, dbConfig.username, dbConfig.password, {
-  host: dbConfig.options.host,
-  dialect: dbConfig.options.dialect,
-  port: dbConfig.options.port,
-  pool: dbConfig.options.pool,
-  dialectOptions: dbConfig.options.dialectOptions,
-  logging: dbConfig.options.logging,
+const environment = process.env.NODE_ENV || 'development';
+const dbConfig = config[environment];
+const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, {
+  host: dbConfig.host,
+  dialect: dbConfig.dialect,
 });
 
 sequelize.authenticate()
@@ -33,12 +23,7 @@ sequelize.authenticate()
     console.error('Unable to connect to the database:', err);
   });
 
-app.use('/api', Authentication({
-  AUDIENCE: AUDIENCE_TYPE.CUSTOMER,
-  ignorePaths: CUSTOMER_IGNORE_PATH,
-  ISSUER,
-}), defaultRoutes);
-
+app.use('/api', defaultRoutes);
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });

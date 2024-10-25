@@ -1,26 +1,23 @@
 {
   "development": {
-    "username": "root",
-    "password": "",
-    "database": "mysql",
+    "username": "postgres",
+    "password": "Mishra@1998",
+    "database": "schedule-notification",
     "host": "127.0.0.1",
-    "dialect": "mysql",
-    "port": 3306
+    "dialect": "postgres"  
   },
   "test": {
-    "username": "root",
-    "password": "",
-    "database": "mysql",
+    "username": "postgres",
+    "password": "Mishra@1998",
+    "database": "agile_test",
     "host": "127.0.0.1",
-    "dialect": "mysql",
-    "port": 3306
+    "dialect": "postgres"
   },
   "production": {
-    "username": "root",
-    "password": "",
-    "database": "mysql",
+    "username": "postgres",
+    "password": "Mishra@1998",
+    "database": "agile_production",
     "host": "127.0.0.1",
-    "dialect": "mysql",
-    "port": 3306
+    "dialect": "postgres"
   }
 }
