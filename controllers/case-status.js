@@ -31,7 +31,7 @@ const submitReceipt = async (req, res) => {
     }
 
     const {
-      caseStatus, message, publicId, errors,
+      currentCaseStatusTextEn, message, errors,
     } = await CaseStatusService.submitReceipt(receiptNumber, registrationToken);
 
     if (errors) {
@@ -39,7 +39,7 @@ const submitReceipt = async (req, res) => {
     }
 
     return res.status(201).json({
-      status: 'success', caseStatus, publicId, message,
+      status: 'success', currentCaseStatusTextEn, message,
     });
   } catch (error) {
     return res.status(500).json({ status: 'error', message: 'Internal server error' });

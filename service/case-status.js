@@ -6,11 +6,19 @@ const { user_device: UserDeviceModel, Sequelize: { Op } } = require('../models')
 const Helper = require('../utils/helper');
 const { sendNotification } = require('./notification-service');
 
-const USCIS_TOKEN_URL = 'https://api-int.uscis.gov/oauth/accesstoken';
-const USCIS_CASE_STATUS_URL = 'https://api-int.uscis.gov/case-status';
+const USCIS_TOKEN_URL = '';
+const USCIS_CASE_STATUS_URL = '';
 
 const registerToken = async (registrationToken) => {
   try {
+    const userDevice = await UserDeviceModel.findOne({
+      where: { registration_token: registrationToken },
+    });
+
+    if (userDevice) {
+      return { errors: [ { name: 'Device', message: 'registration token already exists!' } ] };
+    }
+
     const publicId = uuidV1();
 
     await UserDeviceModel.create({ registration_token: registrationToken, public_id: publicId });
@@ -24,9 +32,9 @@ const registerToken = async (registrationToken) => {
 const getAccessToken = async () => {
   try {
     const response = await axios.post(USCIS_TOKEN_URL, qs.stringify({
-      client_id: 'su3SJI9H33OnIcA6TLecXctzxFo1YEPy',
-      client_secret: 'vaIMHzzRHGRrK25c',
-      grant_type: 'client_credentials',
+      client_id: '',
+      client_secret: '',
+      grant_type: '',
     }), {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
@@ -94,7 +102,7 @@ const submitReceipt = async (receiptNumber, registrationToken) => {
         { where: { registration_token: registrationToken } },
       );
 
-      return { currentCaseStatusTextEn, message: 'Notification successfully sent.' };
+      return { currentCaseStatusTextEn, message: 'status successfully sent.' };
     }
 
     return { message: 'Case status not found.' };

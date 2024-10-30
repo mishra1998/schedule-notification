@@ -34,6 +34,5 @@ module.exports = {
         schema: 'public',
       },
     },
-    // Add configurations for test and production as needed
   },
 };
